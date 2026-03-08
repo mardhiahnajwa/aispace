@@ -9,6 +9,8 @@ from typing import TypedDict, Annotated, Sequence
 import operator
 import os
 
+# import path
+
 # Define the tool
 @tool
 def get_programming_fact(language: str) -> str:
@@ -25,12 +27,6 @@ def get_programming_fact(language: str) -> str:
 # Define the state
 class AgentState(TypedDict):
     messages: Annotated[Sequence[HumanMessage | AIMessage], operator.add]
-
-# Initialize the LLM
-llm = ChatOpenAI(model="gpt-3.5-turbo", temperature=0)
-
-# Bind the tool to the LLM
-llm_with_tools = llm.bind_tools([get_programming_fact])
 
 # Define the agent function
 def agent_node(state: AgentState):
@@ -50,14 +46,6 @@ def tool_node(state: AgentState):
             results.append(result)
     return {"messages": [AIMessage(content=str(results))]}
 
-# Build the graph
-graph = StateGraph(AgentState)
-
-graph.add_node("agent", agent_node)
-graph.add_node("tools", tool_node)
-
-graph.set_entry_point("agent")
-
 # Conditional routing
 def should_continue(state: AgentState):
     messages = state["messages"]
@@ -66,14 +54,25 @@ def should_continue(state: AgentState):
         return "tools"
     return END
 
-graph.add_conditional_edges("agent", should_continue)
-graph.add_edge("tools", "agent")
-
-# Compile the graph
-agent_executor = graph.compile()
-
 # Django view
 def home(request):
+    # Bind the tool to the LLM
+    llm_with_tools = llm.bind_tools([get_programming_fact])
+
+    # Build the graph
+    graph = StateGraph(AgentState)
+
+    graph.add_node("agent", agent_node)
+    graph.add_node("tools", tool_node)
+
+    graph.set_entry_point("agent")
+
+    graph.add_conditional_edges("agent", should_continue)
+    graph.add_edge("tools", "agent")
+
+    # Compile the graph
+    agent_executor = graph.compile()
+
     if request.method == 'GET':
         question = request.GET.get('question', 'Tell me about Python')
         # Run the agent
