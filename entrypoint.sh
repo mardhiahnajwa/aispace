@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# Run migrations (uncomment when db is added)
-# python manage.py migrate
+# Run migrations
+python manage.py migrate
 
 # Collect static files
 python manage.py collectstatic --noinput
