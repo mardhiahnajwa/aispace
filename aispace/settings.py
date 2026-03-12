@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_celery_beat',
+    'django_celery_results',
     'aispace',
     'bot',
     'langchain_agent',
@@ -123,3 +125,25 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+# ---------------------------------------------------------------------------
+# Celery configuration
+# ---------------------------------------------------------------------------
+
+# Broker URL – defaults to a local Redis instance; override via environment.
+CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL', 'redis://redis:6379/0')
+
+# Store task results in the Django database (django-celery-results).
+CELERY_RESULT_BACKEND = 'django-db'
+
+# Use the Django ORM as the scheduler backend (django-celery-beat).
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+# Serialise task messages as JSON.
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_ACCEPT_CONTENT = ['json']
+
+# Match the project timezone.
+CELERY_TIMEZONE = TIME_ZONE
