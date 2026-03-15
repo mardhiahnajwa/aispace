@@ -1,14 +1,11 @@
 import os
 import operator
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
+from django.http import HttpResponse, JsonResponse
 from langchain.agents import create_agent, AgentExecutor
-from langchain_core.messages import HumanMessage, AIMessage
 from typing import TypedDict, Annotated, Sequence
-
-# import path
 
 # Define the tool
 @tool
@@ -23,12 +20,10 @@ def get_programming_fact(language: str) -> str:
     }
     return facts.get(language.lower(), f"I'm sorry, I don't have information about {language}. Try Python, JavaScript, Java, C++, or Ruby.")
 
-# Initialize the LLM
-llm = ChatOpenAI(model="gpt-5.2-mini", temperature=0)
-
 # Django view
 def home(request):
     # Create the agent
+    llm = ChatOpenAI(model="gpt-5.2-mini", temperature=0)
     agent = create_agent(llm, tools=[get_programming_fact])
     agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=[get_programming_fact])
 
