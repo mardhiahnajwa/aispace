@@ -1,15 +1,11 @@
+import os
+import operator
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langgraph import StateGraph
-from langgraph.graph import END
-from langchain_core.messages import HumanMessage, AIMessage
+from django.http import HttpResponse, JsonResponse
+from langchain.agents import create_agent, AgentExecutor
 from typing import TypedDict, Annotated, Sequence
-import operator
-import os
-
-# import path
 
 # Define the tool
 @tool
@@ -24,59 +20,16 @@ def get_programming_fact(language: str) -> str:
     }
     return facts.get(language.lower(), f"I'm sorry, I don't have information about {language}. Try Python, JavaScript, Java, C++, or Ruby.")
 
-# Define the state
-class AgentState(TypedDict):
-    messages: Annotated[Sequence[HumanMessage | AIMessage], operator.add]
-
-# Define the agent function
-def agent_node(state: AgentState):
-    messages = state["messages"]
-    response = llm_with_tools.invoke(messages)
-    return {"messages": [response]}
-
-# Define the tool execution function
-def tool_node(state: AgentState):
-    messages = state["messages"]
-    last_message = messages[-1]
-    tool_calls = last_message.tool_calls
-    results = []
-    for tool_call in tool_calls:
-        if tool_call["name"] == "get_programming_fact":
-            result = get_programming_fact.invoke(tool_call["args"])
-            results.append(result)
-    return {"messages": [AIMessage(content=str(results))]}
-
-# Conditional routing
-def should_continue(state: AgentState):
-    messages = state["messages"]
-    last_message = messages[-1]
-    if hasattr(last_message, 'tool_calls') and last_message.tool_calls:
-        return "tools"
-    return END
-
 # Django view
 def home(request):
-    # Bind the tool to the LLM
-    llm_with_tools = llm.bind_tools([get_programming_fact])
-
-    # Build the graph
-    graph = StateGraph(AgentState)
-
-    graph.add_node("agent", agent_node)
-    graph.add_node("tools", tool_node)
-
-    graph.set_entry_point("agent")
-
-    graph.add_conditional_edges("agent", should_continue)
-    graph.add_edge("tools", "agent")
-
-    # Compile the graph
-    agent_executor = graph.compile()
+    # Create the agent
+    llm = ChatOpenAI(model="gpt-5.2-mini", temperature=0)
+    agent = create_agent(llm, tools=[get_programming_fact])
+    agent_executor = AgentExecutor.from_agent_and_tools(agent=agent, tools=[get_programming_fact])
 
     if request.method == 'GET':
         question = request.GET.get('question', 'Tell me about Python')
         # Run the agent
-        result = agent_executor.invoke({"messages": [HumanMessage(content=question)]})
-        answer = result["messages"][-1].content
-        return JsonResponse({"question": question, "answer": answer})
+        result = agent_executor.run(question)
+        return JsonResponse({"question": question, "answer": result})
     return HttpResponse("Use GET with ?question=your question")
