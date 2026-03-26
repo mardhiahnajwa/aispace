@@ -1,4 +1,4 @@
-from django.langchain_agent import AppConfig
+from django.apps import AppConfig
 
 
 class MyappConfig(AppConfig):

@@ -2,14 +2,17 @@ from django.shortcuts import render
 from django.http import HttpResponse, JsonResponse
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langgraph import StateGraph
-from langgraph.graph import END
+from langgraph.graph import StateGraph, END
 from langchain_core.messages import HumanMessage, AIMessage
 from typing import TypedDict, Annotated, Sequence
 import operator
 import os
 
 # import path
+
+# Initialize the LLM
+llm = ChatOpenAI(model="gpt-4-turbo", temperature=0)
+llm_with_tools = None  # Will be set in home view
 
 # Define the tool
 @tool
@@ -30,6 +33,7 @@ class AgentState(TypedDict):
 
 # Define the agent function
 def agent_node(state: AgentState):
+    global llm_with_tools
     messages = state["messages"]
     response = llm_with_tools.invoke(messages)
     return {"messages": [response]}
@@ -56,6 +60,7 @@ def should_continue(state: AgentState):
 
 # Django view
 def home(request):
+    global llm_with_tools
     # Bind the tool to the LLM
     llm_with_tools = llm.bind_tools([get_programming_fact])
 

@@ -1,5 +1,12 @@
 Django==4.2.7
+djangorestframework
 langchain
 langchain-openai
 langgraph
 langchain-community
+chromadb
+pandas
+matplotlib
+seaborn
+numpy
+python-dotenv
