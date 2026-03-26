@@ -10,3 +10,5 @@ matplotlib
 seaborn
 numpy
 python-dotenv
+chromadb
+pypdf

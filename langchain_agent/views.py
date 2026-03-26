@@ -1,18 +1,15 @@
+import os
+import operator
 from django.shortcuts import render
-from django.http import HttpResponse, JsonResponse
 from langchain_core.tools import tool
 from langchain_openai import ChatOpenAI
-from langgraph.graph import StateGraph, END
-from langchain_core.messages import HumanMessage, AIMessage
+from django.http import HttpResponse, JsonResponse
+from langchain.agents import create_agent, AgentExecutor
 from typing import TypedDict, Annotated, Sequence
 import operator
 import os
 
 # import path
-
-# Initialize the LLM
-llm = ChatOpenAI(model="gpt-4-turbo", temperature=0)
-llm_with_tools = None  # Will be set in home view
 
 # Define the tool
 @tool
@@ -33,7 +30,6 @@ class AgentState(TypedDict):
 
 # Define the agent function
 def agent_node(state: AgentState):
-    global llm_with_tools
     messages = state["messages"]
     response = llm_with_tools.invoke(messages)
     return {"messages": [response]}
@@ -60,7 +56,6 @@ def should_continue(state: AgentState):
 
 # Django view
 def home(request):
-    global llm_with_tools
     # Bind the tool to the LLM
     llm_with_tools = llm.bind_tools([get_programming_fact])
 
@@ -81,7 +76,6 @@ def home(request):
     if request.method == 'GET':
         question = request.GET.get('question', 'Tell me about Python')
         # Run the agent
-        result = agent_executor.invoke({"messages": [HumanMessage(content=question)]})
-        answer = result["messages"][-1].content
-        return JsonResponse({"question": question, "answer": answer})
+        result = agent_executor.run(question)
+        return JsonResponse({"question": question, "answer": result})
     return HttpResponse("Use GET with ?question=your question")
