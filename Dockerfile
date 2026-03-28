@@ -25,8 +25,8 @@ COPY . /app/
 RUN chmod +x entrypoint.sh
 
 # Create a non-root user
-RUN adduser --disabled-password --gecos '' django-user && chown -R django-user:django-user /app
-USER django-user
+RUN adduser --disabled-password --gecos '' aispace && chown -R aispace:aispace /app
+USER aispace
 
 # Expose port
 EXPOSE 8000

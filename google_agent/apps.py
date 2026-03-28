@@ -1,6 +1,6 @@
 from django.apps import AppConfig
 
 
-class MyappConfig(AppConfig):
+class GoogleAgentConfig(AppConfig):
     default_auto_field = 'django.db.models.BigAutoField'
-    name = 'langchain_agent'
+    name = 'google_agent'

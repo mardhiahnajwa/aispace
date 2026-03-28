@@ -1,3 +1,1 @@
-from django.db import models
-
-# Create your models here.
+# Models will be managed via external database
