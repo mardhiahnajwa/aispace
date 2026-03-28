@@ -4,11 +4,29 @@ langchain
 langchain-openai
 langgraph
 langchain-community
+langchain-text-splitters
 chromadb
 pandas
 matplotlib
 seaborn
 numpy
 python-dotenv
-chromadb
 pypdf
+
+# Web and document loaders
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+
+# GitHub loader
+PyGithub>=2.0.0
+
+# SharePoint loader
+office365-rest-client-library>=2.5.0
+
+# Google Drive loader
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=1.1.0
+google-api-python-client>=2.80.0
+
+# HTTP utilities
+requests>=2.31.0
