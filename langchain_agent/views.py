@@ -2,12 +2,11 @@ import os
 import operator
 from django.shortcuts import render
 from langchain_core.tools import tool
-from langchain_openai import ChatOpenAI
-from django.http import HttpResponse, JsonResponse
-from langchain.agents import create_agent, AgentExecutor
+from langchain_core.graph import StateGraph, END
 from typing import TypedDict, Annotated, Sequence
-import operator
-import os
+from django.http import HttpResponse, JsonResponse
+from langchain_community.chat_models import ChatOpenRouter
+from langchain_core.messages import HumanMessage, AIMessage
 
 # import path
 
@@ -56,6 +55,12 @@ def should_continue(state: AgentState):
 
 # Django view
 def home(request):
+    # Initialize OpenRouter LLM
+    llm = ChatOpenRouter(
+        model=os.getenv("OPENROUTER_FREE_MODEL", "qwen/qwen3.6-plus:free"),
+        openrouter_api_key=os.getenv("OPENROUTER_API_KEY"),
+    )
+    
     # Bind the tool to the LLM
     llm_with_tools = llm.bind_tools([get_programming_fact])
 

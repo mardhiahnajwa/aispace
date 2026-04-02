@@ -28,5 +28,8 @@ google-auth-oauthlib>=1.0.0
 google-auth-httplib2>=0.2.0
 google-api-python-client>=2.80.0
 
+# Google ADK (Agent Development Kit)
+google-adk>=0.1.0
+
 # HTTP utilities
 requests>=2.31.0
